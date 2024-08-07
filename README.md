@@ -70,4 +70,9 @@ Following are methods that you can use to perform operations with collection.
    ```
 
 > You can explore more collection methods from [HERE](https://wendelladriel.com/blog/laravel-collections-the-artisans-guide)
-   
+   ---
+# Creating module
+Steps to create module:
+1. Generate module from module **bulder > build** from CRM by specifing module name, descriptions and contexts required.
+2. On successfully module generation it will download zip file for that module with specified module name.
+3. Upload that module zip file in perfex CRM **setup > modules**. After that folder with that module name will automatically gets generated inside modules folder in perfex CRM you can customize it as per requirement.
