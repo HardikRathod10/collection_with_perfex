@@ -27,7 +27,7 @@
                 <div class="panel">
                     <div class="panel-s">
                         <div class="panel-body" id="output-container">
-                            <table class="table table-striped" border=1>
+                            <table class="table table-striped" border=1 id="invoice-tbl">
                                 <thead>
                                     <tr>
                                         <th>#</th>

@@ -23,6 +23,7 @@ application/logs/*
 /media
 /modules/*
 !/modules/collection
+!/modules/crud_module
 /system
 /resources
 /temp

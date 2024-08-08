@@ -12,7 +12,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /*
  * Define module name
  * Module Name Must be in CAPITAL LETTERS
-*/
+ */
 define('COLLECTION_MODULE', 'collection');
 
 // require_once __DIR__.'/vendor/autoload.php';
@@ -21,15 +21,17 @@ define('COLLECTION_MODULE', 'collection');
  * Register activation module hook
  */
 register_activation_hook(COLLECTION_MODULE, 'collection_module_activate_hook');
-function collection_module_activate_hook() {
-    require_once __DIR__.'/install.php';
+function collection_module_activate_hook()
+{
+    require_once __DIR__ . '/install.php';
 }
 
 /*
  * Register deactivation module hook
  */
 register_deactivation_hook(COLLECTION_MODULE, 'collection_module_deactivate_hook');
-function collection_module_deactivate_hook() {
+function collection_module_deactivate_hook()
+{
     update_option('collection_enabled', 0);
 }
 /*
@@ -41,26 +43,31 @@ register_language_files(COLLECTION_MODULE, [COLLECTION_MODULE]);
 /*
  * Load module helper file
  */
-get_instance()->load->helper(COLLECTION_MODULE.'/collection');
+get_instance()->load->helper(COLLECTION_MODULE . '/collection');
 
 require_once __DIR__ . '/includes/assets.php';
 require_once __DIR__ . '/includes/sidebar_menu_links.php';
 
 hooks()->add_action('admin_auth_init', 'collection_admin_auth_init');
-function collection_admin_auth_init() {
+function collection_admin_auth_init()
+{
     // add your logic here
 
 }
 
 hooks()->add_action('module_activated', 'collection_module_activated');
-function collection_module_activated() {
+function collection_module_activated()
+{
     // add your logic here
 
 }
 
 hooks()->add_action('module_deactivated', 'collection_module_deactivated');
-function collection_module_deactivated() {
+function collection_module_deactivated()
+{
     // add your logic here
-
+    echo "<script>
+            confirm('Do you really want to deactivate module?');
+        </script>";
 }
 
