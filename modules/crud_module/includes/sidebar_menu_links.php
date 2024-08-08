@@ -17,7 +17,7 @@ function crud_module_module_init_menu_items() {
     if (has_permission('crud_module', '', 'view')) {
         get_instance()->app_menu->add_sidebar_children_item('crud_module', [
             'slug'     => 'link2',
-            'name'     => _l('link2'),
+            'name'     => _l('Clients CRUD'),
             'href'     => admin_url('crud_module/link2'),
             'position' => 2,
         ]);

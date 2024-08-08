@@ -30,8 +30,12 @@
                 <?= render_input('zip', 'Zip', '', 'number', ['id' => 'zip']) ?>
                 <!-- Website -->
                 <?= render_input('website', 'Website', '', 'text', ['id' => 'website']); ?>
+                <!-- Website -->
+                <?= render_input('website', 'Website', '', 'text', ['id' => 'website']); ?>
+                <!-- Website -->
+                <?= render_input('website', 'Website', '', 'text', ['id' => 'website']); ?>
                 <!-- Checbox -->
-                <?= render_input('is_active', 'Is Active', 'active', 'checkbox' , ['id' => 'is_active']) ?>
+                <?= render_input('is_active', 'Is Active', 'active', 'checkbox', ['id' => 'is_active']) ?>
                 <div class="mb-3">
                     <button class="btn btn-primary" id="save-btn">SAVE</button>
                 </div>
@@ -50,6 +54,17 @@
                         <div class="panel-body">
                             <button class="btn btn-secondary" id="create-btn" data-toggle="modal"
                                 data-target="#insertModal">Create Client</button>
+                            <?php render_datatable([
+                                '#',
+                                'Company',
+                                'Phone',
+                                'Country',
+                                'City',
+                                'Zip',
+                                'Active',
+                                'Website',
+                                'Action',
+                            ]); ?>
                             <table class="table table-striped" border=1 id="crud-tbl">
                                 <thead>
                                     <tr>
@@ -210,4 +225,5 @@
             });
         });
     });
+    initDataTable();
 </script>
