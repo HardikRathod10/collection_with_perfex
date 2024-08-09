@@ -76,3 +76,106 @@ Steps to create module:
 1. Generate module from module **bulder > build** from CRM by specifing module name, descriptions and contexts required.
 2. On successfully module generation it will download zip file for that module with specified module name.
 3. Upload that module zip file in perfex CRM **setup > modules**. After that folder with that module name will automatically gets generated inside modules folder in perfex CRM you can customize it as per requirement.
+
+# DataTable in perfex CRM
+> All datatable functions are located at helpers > datatables_helpers.php
+#### Steps to initialize datatable in perfex
+1. Render table using render_datatable() inside view file where you want to display table.
+```
+   //File: table.php inside view/table.php
+     <div id="wrapper">
+       <div class="content">
+           <div class="row">
+               <div class="col-md-12">
+                   <div class="panel">
+                       <div class="panel-s">
+                           <div class="panel-body">
+                               <button class="btn btn-primary" id="create-btn" data-toggle="modal"
+                                   data-target="#insertModal">Create Client</button>
+                               <div class="mtop5">
+                                   // This will load table
+                                   <?php render_datatable([
+                                       '#',
+                                       'Company',
+                                       'Phone',
+                                       'Country',
+                                       'City',
+                                       'Zip',
+                                       'Active',
+                                       'Website'
+                                   ], 'crud_tbl'); ?>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+```
+
+2. Add **initDataTable()** JS function in view file inside **<script>** where you have rendered table. This is default js method prepared by perfex.
+
+```
+//File: table.php inside view/table.php
+<script>
+    initDataTable('.table-crud_tbl', admin_url + "crud_module/show_clients", undefined, undefined, undefined, [0, 'desc']);
+</script>
+```
+3. Create file inside view for fetching table data and performing and generating queries for data.
+```
+File: datatable.php inside views/datatable.php
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed');
+
+$aColumns = [
+    'userid',
+    'company',
+    'phonenumber',
+    'country',
+    'city',
+    'zip',
+    'active',
+    'website'
+];
+
+$sIndexColumn = 'userid';
+$sTable = 'tblclients';
+
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable);
+$output = $result['output'];
+$rResult = $result['rResult'];
+
+foreach ($rResult as $aRow) {
+    $row = [];
+
+    $row[] = $aRow['userid'];
+    $action_btn = '<div class="row-options"><a href="" id="edt-client" data-id="'.$aRow['userid'].'">View</a> | <a href="" class="text-danger _delete" id="delete-client" data-id="'.$aRow['userid'].'">Delete </a></div>';
+    $row[] = $aRow['company'].$action_btn;
+    $row[] = $aRow['phonenumber'];
+    $row[] = $aRow['country'];
+    $row[] = $aRow['city'];
+    $row[] = $aRow['zip'];
+    $is_checked = $aRow['active'] == 1 ? 'checked' : '';
+    $switch_btn = '<div class="onoffswitch" data-toggle="tooltip" data-title="' . _l('customer_active_inactive_help') . '">
+    <input type="checkbox" data-switch-url="' . admin_url() . 'crud_module/change_status" name="onoffswitch" class="onoffswitch-checkbox" id="' . $aRow['userid'] . '" data-id="' . $aRow['userid'] . '" ' . ($aRow['active'] == 1 ? 'checked' : '') . '>
+    <label class="onoffswitch-label" for="' . $aRow['userid'] . '"></label>
+    </div>';
+    $row[] = $switch_btn;
+    $row[] = $aRow['website'];
+
+    $output['aaData'][] = $row;
+}
+```
+4. Create controller method where you sending ajax request and get datatable data there.
+```
+    // Showing clients
+    public function show_clients()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data(module_views_path('crud_module', 'datatable'));
+        }
+    }
+```
+
