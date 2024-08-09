@@ -14,7 +14,7 @@ class Crud_module_model extends App_Model
         return $this->db->get('tblcountries')->result();
     }
 
-    public function insert_client($data)
+    public function save_client($data)
     {
         $data_arr = [
             'company' => $data['cmp_nm'],
@@ -25,49 +25,33 @@ class Crud_module_model extends App_Model
             'website' => $data['website'],
             'active' => isset($data['is_active']) ? 1 : 0,
         ];
-        return $this->db->insert('tblclients', $data_arr);
-    }
 
-    public function fetch_clients($id)
-    {
-        if ($id === null) {
-            return $this->db->select('userid, company, phonenumber, country as country_id, tblcountries.short_name as country, city, zip, website, active')
-                ->from('tblclients')
-                ->join('tblcountries', 'tblclients.country=tblcountries.country_id')
-                ->get()
-                ->result_array();
+        if (isset($data['id'])) {
+            $update = $this->db->update('tblclients', $data_arr,['userid' => $data['id']]);
+            return ($this->db->affected_rows() > 0) ? ['status' => true, 'message' => _l('customer_added_successfully')] : ['status' => true, 'message' => _l('customer_not_added_successfully')];
         } else {
-            return $this->db->select('userid, company, phonenumber, country as country_id, tblcountries.short_name as country, city, zip, website, active')
-                ->from('tblclients')
-                ->join('tblcountries', 'tblclients.country=tblcountries.country_id')
-                ->where('userid', $id)
-                ->get()
-                ->result_array();
+            $insert = $this->db->insert('tblclients', $data_arr);
+            return ($insert) ? ['status' => true, 'message' => _l('customer_added_successfully')] : ['status' => true, 'message' => _l('customer_not_added_successfully')];
         }
     }
 
-    public function update_client($data)
+    // Fetching client using id
+    public function fetch_client($id)
     {
-        $id = $data['id'];
-        $data_arr = [
-            'company' => $data['cmp_nm'],
-            'phonenumber' => $data['phone_no'],
-            'country' => $data['country'],
-            'city' => $data['city'],
-            'zip' => $data['zip'],
-            'website' => $data['website'],
-            'active' => isset($data['is_active']) ? 1 : 0,
-        ];
-        return $this->db->update('tblclients', $data_arr, ['userid'=> $id]);
-
+        $client = $this->db->select('*')->from('tblclients')->where('userid', $id)->get()->result();
+        return ($client) ? ['status' => true, 'client' => $client] : ['status' => false];
     }
-
-    public function update_status($data){
-        return $this->db->update('tblclients',['active'=>$data['status']], ['userid'=> $data['id']]);
+    public function update_status($id, $status)
+    {
+        return $this->db->update('tblclients', ['active' => $status], ['userid' => $id]);
     }
 
     public function delete_client($id)
     {
-        return $this->db->delete('tblclients', ['userid' => $id]);
+        $this->db->delete('tblclients', ['userid' => $id]);
+
+        return [
+            'message' => ($this->db->affected_rows() > 0) ? _l('delete_successfully') : _l('something_went_wrong'),
+        ];
     }
 }

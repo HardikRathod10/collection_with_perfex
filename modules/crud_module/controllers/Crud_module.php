@@ -8,7 +8,7 @@ class Crud_module extends AdminController
         parent::__construct();
 
         $this->load->model('crud_module_model');
-        $this->load->library('form_validation');
+        $this->load->library(['form_validation', 'app']);
         $this->load->helper('crud_module');
     }
 
@@ -40,39 +40,38 @@ class Crud_module extends AdminController
             ];
             echo json_encode(['status' => false, 'errors' => $errors]);
         } else {
-            if (isset($post_data['id'])) {
-                echo json_encode(['status' => $this->crud_module_model->update_client($post_data)]);
-            } else {
-                echo json_encode(['status' => $this->crud_module_model->insert_client($post_data)]);
-            }
+            $res = $this->crud_module_model->save_client($post_data);
+            echo json_encode($res);
         }
     }
+
+    // Showing clients
     public function show_clients()
     {
-        $id = $this->input->post('id');
-        $clients = $this->crud_module_model->fetch_clients($id);
-        if (!empty($clients)) {
-            echo json_encode(['status' => true, 'clients' => $clients]);
-        } else {
-            echo json_encode(['status' => false]);
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data(module_views_path('crud_module', 'datatable'));
         }
+    }
+
+    // Public method to fetch client for update
+    public function edit_fetch_client()
+    {
+        $id = $this->input->post('id');
+        echo json_encode($this->crud_module_model->fetch_client($id));
     }
 
     // Changing user active status
-    public function change_status(){
-        $post_data = $this->input->post();
-
-        echo json_encode($this->crud_module_model->update_status($post_data));
+    public function change_status($id, $status)
+    {
+        $this->crud_module_model->update_status($id, $status);
     }
 
+    // Deleting clients
     public function delete_client()
     {
         $id = $this->input->post('id');
-        if ($this->crud_module_model->delete_client($id)) {
-            echo json_encode(['status' => true]);
-        } else {
-            echo json_encode(['status' => false]);
-        }
+        $res = $this->crud_module_model->delete_client($id);
+        echo json_encode($res);
 
     }
 }
