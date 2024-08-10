@@ -6,7 +6,7 @@ $aColumns = [
     'userid',
     'company',
     'phonenumber',
-    'country',
+    db_prefix() . 'countries.short_name as country_name',
     'city',
     'zip',
     'active',
@@ -15,8 +15,10 @@ $aColumns = [
 
 $sIndexColumn = 'userid';
 $sTable = 'tblclients';
-
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable);
+$join = [
+    'LEFT JOIN ' . db_prefix() . 'countries ON ' . db_prefix() . 'clients.country = ' . db_prefix() . 'countries.country_id'
+];
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join);
 $output = $result['output'];
 $rResult = $result['rResult'];
 
@@ -24,10 +26,10 @@ foreach ($rResult as $aRow) {
     $row = [];
 
     $row[] = $aRow['userid'];
-    $action_btn = '<div class="row-options"><a href="" id="edt-client" data-id="'.$aRow['userid'].'">View</a> | <a href="" class="text-danger _delete" id="delete-client" data-id="'.$aRow['userid'].'">Delete </a></div>';
-    $row[] = $aRow['company'].$action_btn;
+    $action_btn = '<div class="row-options"><a href="" id="edt-client" data-id="' . $aRow['userid'] . '">Edit</a> | <a href="" class="text-danger _delete" id="delete-client" data-id="' . $aRow['userid'] . '">Delete </a></div>';
+    $row[] = $aRow['company'] . $action_btn;
     $row[] = $aRow['phonenumber'];
-    $row[] = $aRow['country'];
+    $row[] = $aRow['country_name'];
     $row[] = $aRow['city'];
     $row[] = $aRow['zip'];
     $is_checked = $aRow['active'] == 1 ? 'checked' : '';

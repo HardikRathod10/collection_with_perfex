@@ -8,7 +8,8 @@ class Crud_module extends AdminController
         parent::__construct();
 
         $this->load->model('crud_module_model');
-        $this->load->library(['form_validation', 'app']);
+        $this->load->library(['form_validation']);
+        $this->form_validation->set_error_delimiters('<p class="text-danger">', '</p>');
         $this->load->helper('crud_module');
     }
 
@@ -19,6 +20,7 @@ class Crud_module extends AdminController
         $this->load->view('crud_view', $data);
     }
 
+    // Creating client
     public function create_client()
     {
         $post_data = $this->input->post();
@@ -73,6 +75,18 @@ class Crud_module extends AdminController
         $res = $this->crud_module_model->delete_client($id);
         echo json_encode($res);
 
+    }
+
+    // Public function to check client name is exists or not
+    public function client_name_exists()
+    {
+        if ($this->input->is_ajax_request()) {
+            $cname = $this->input->post('cname');
+            if ($cname != "") {
+                $query = $this->db->get_where('tblclients', ['company' => $cname]);
+                echo ($query->num_rows() > 0) ? json_encode(true) : json_encode(false);
+            }
+        }
     }
 }
 

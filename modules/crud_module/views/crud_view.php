@@ -16,14 +16,7 @@
                 <!-- Phone number -->
                 <?= render_input('phone_no', 'Phone number', '', 'number', ['id' => 'phone_no']); ?>
                 <!-- country -->
-                <div class="mb-3">
-                    <label for="country">Country</label>
-                    <select class="form-control" name="country" id="country">
-                        <?php foreach ($countries as $country): ?>
-                            <option value="<?= $country->country_id ?>"><?= $country->short_name ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <?= render_select('country', $countries, ['country_id', 'short_name'], "Select country"); ?>
                 <!-- City -->
                 <?= render_input('city', 'City', '', 'text', ['id' => 'city']); ?>
                 <!-- Zip -->
@@ -31,8 +24,14 @@
                 <!-- Website -->
                 <?= render_input('website', 'Website', '', 'text', ['id' => 'website']); ?>
                 <!-- Checbox -->
-                <label class="mright10" for="is_active">Active Status</label>
-                <input type="checkbox" name="is_active" id="is_active">
+                <div class="form-group">
+                    <label class="mright10" for="is_active">Active Status</label>
+                    <!-- <input type="checkbox" name="is_active" id="is_active"> -->
+                    <div class="onoffswitch">
+                        <input type="checkbox" id="active" class="onoffswitch-checkbox" name="is_active">
+                        <label class="onoffswitch-label" for="active" data-toggle="tooltip" title=""></label>
+                    </div>
+                </div>
                 <div class="mb-3">
                     <button class="btn btn-primary" id="save-btn">SAVE</button>
                 </div>
@@ -63,24 +62,6 @@
                                     'Website'
                                 ], 'crud_tbl'); ?>
                             </div>
-                            <!-- <table class="table table-striped" border=1 id="crud-tbl">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Company</th>
-                                        <th>Phone</th>
-                                        <th>Country</th>
-                                        <th>City</th>
-                                        <th>Zip</th>
-                                        <th>Active</th>
-                                        <th>Website</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="t-body">
-
-                                </tbody>
-                            </table> -->
                         </div>
                     </div>
                 </div>
@@ -93,37 +74,124 @@
 <script>
     initDataTable('.table-crud_tbl', admin_url + "crud_module/show_clients", undefined, undefined, undefined, [0, 'desc']);
 
-    // Saving clients data
-    $('#save-btn').on('click', function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: "<?php echo admin_url('crud_module/create_client'); ?>",
-            type: "post",
-            data: $('#create-form').serialize(),
-            dataType: "json",
-            success: function (response) {
-                if (!response.status) {
-                    $.each(response.errors, function (key, value) {
-                        if (value != '') {
-                            $(`div[app-field-wrapper=${key}]`).addClass('has-error');
-                            $(`div[app-field-wrapper=${key}]`).append(value);
+    // Resetting form on modal hide event 
+    $('#insertModal').on('hide.bs.modal', function () {
+        $('#create-form').trigger('reset');
+    });
+
+    // Function to validate website
+    function validWebsite(url) {
+        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + //port
+            '(\\?[;&amp;a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$', 'i');
+        return pattern.test(url);
+    }
+
+    // Adding url validation function
+    $.validator.addMethod('valid_url', function (value) {
+        return validWebsite(value);
+    }, "Invalid Website URL");
+
+    // Custom validatio method to validate phone number
+    $.validator.addMethod('valid_phone', function (value, element) {
+        return this.optional(element) || /^\d{3}-?\d{3}-?\d{4}$/.test(value);
+    }, "Invalid phone number");
+
+    // Validation rules for insertion
+    $('#create-form').validate({
+        errorClass: "text-danger",
+        rules: {
+            cmp_nm: {
+                required: true,
+                remote: {
+                    url: '<?= admin_url('crud_module/client_name_exists'); ?>',
+                    type: 'post',
+                    data: {
+                        cname: function () {
+                            return $('#cmp_nm').val();
                         }
-                    });
+                    }
                 }
-                else {
-                    $('#create-form').trigger('reset');
-                    $('#insertModal').modal('hide');
-                    alert_float('success', response.message);
-                    $('.table-crud_tbl').DataTable().ajax.reload();
-                }
+            },
+            phone_no: {
+                required: true,
+                valid_phone: true
+            },
+            country: {
+                required: true
+            },
+            city: {
+                required: true
+            },
+            zip: {
+                required: true
+            },
+            website: {
+                required: true,
+                valid_url: true
             }
-        });
+        },
+        messages: {
+            cmp_nm: {
+                required: "Company name is required.",
+                remote: "Company name already exists."
+            },
+            phone_no: {
+                required: "Phone number is required."
+            },
+            country: {
+                required: "Please select country."
+            },
+            city: {
+                required: "Please provide city name."
+            },
+            zip: {
+                required: "Please provide zip code."
+            },
+            website: {
+                required: "Please provide website.",
+                valid_url: "Please enter valid website url."
+            }
+        },
+        highlight: function (element, errorClass) {
+            $(element).parent('div.form-group').addClass("has-error");
+        },
+        unhighlight: function (element) {
+            $(element).parent('div.form-group').removeClass("has-error");
+        },
+        submitHandler: function (form) {
+            $.ajax({
+                url: "<?php echo admin_url('crud_module/create_client'); ?>",
+                type: "post",
+                data: $(form).serialize(),
+                dataType: "json",
+                success: function (response) {
+                    console.log(response);
+
+                    if (!response.status) {
+                        $.each(response.errors, function (key, value) {
+                            if (value != '') {
+                                $(`div[app-field-wrapper=${key}]`).addClass('has-error');
+                                $(`div[app-field-wrapper=${key}]`).append(value);
+                            }
+                        });
+                    }
+                    else {
+                        $('#insertModal').modal('hide');
+                        alert_float('success', response.message);
+                        $('.table-crud_tbl').DataTable().ajax.reload();
+                    }
+                }
+            });
+        }
     });
 
     // Ajax request to edit client details
     $(document).on('click', '#edt-client', function (e) {
         e.preventDefault();
-        // $('#insertModal').modal('show');
         $.ajax({
             url: "<?php echo admin_url('crud_module/edit_fetch_client'); ?>",
             type: "post",
@@ -132,15 +200,14 @@
             },
             dataType: "json",
             success: function (response) {
-                // console.log(response.clients[0].userid);
                 if (response.status) {
                     $('#cmp_nm').val(response.client[0].company);
                     $('#phone_no').val(response.client[0].phonenumber);
-                    $('#country').val(response.client[0].country);
+                    $(`#country option[value='${response.client[0].country}']`).prop('selected', true);
                     $('#city').val(response.client[0].city);
                     $('#zip').val(response.client[0].zip);
                     $('#website').val(response.client[0].website);
-                    response.client[0].active == 1 ? $('#is_active').prop('checked', true) : $('#is_active').prop('checked', false)
+                    response.client[0].active == 1 ? $('#active').prop('checked', true) : $('#is_active').prop('checked', false)
                     $('#create-form').append(`<input type='hidden' name='id' value='${response.client[0].userid}'>`);
                     $('#insertModal').modal('show');
                 } else {
@@ -167,59 +234,3 @@
     });
 
 </script>
-<!-- <script>
-
-    $(document).ready(function () {
-        
-
-        // Ajax request to edit client details
-        $(document).on('click', '#edt-client', function () {
-            // $('#insertModal').modal('show');
-            $.ajax({
-                url: "<?php // admin_url('crud_module/show_clients'); ?>",
-                type: "post",
-                data: {
-                    id: $(this).data('id')
-                },
-                dataType: "json",
-                success: function (response) {
-                    // console.log(response.clients[0].userid);
-                    if (response.status) {
-                        $('#cmp_nm').val(response.clients[0].company);
-                        $('#phone_no').val(response.clients[0].phonenumber);
-                        $('#country').val(response.clients[0].country_id);
-                        $('#city').val(response.clients[0].city);
-                        $('#zip').val(response.clients[0].zip);
-                        $('#website').val(response.clients[0].website);
-                        response.clients[0].active == 1 ? $('#is_active').prop('checked', true) : $('#is_active').prop('checked', false)
-                        $('#create-form').append(`<input type='hidden' name='id' value='${response.clients[0].userid}'>`);
-                        $('#insertModal').modal('show');
-                    } else {
-                        // log error
-                    }
-                }
-            });
-        });
-
-        // Ajax request to delete records
-        $(document).on('click', 'button.dlt-btn', function () {
-            $.ajax({
-                type: "post",
-                url: "<?php // admin_url('crud_module/delete_client') ?>",
-                data: {
-                    id: $(this).data('id')
-                },
-                dataType: "json",
-                success: function (response) {
-                    if (response.status) {
-                        showClients();
-                    } else {
-                        console.log("can't delete.");
-                    }
-                }
-            });
-        });
-
-    });
-    initDataTable();
-</script> -->
