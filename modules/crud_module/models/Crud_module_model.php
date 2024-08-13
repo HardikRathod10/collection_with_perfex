@@ -29,7 +29,7 @@ class Crud_module_model extends App_Model
 
         if (isset($data['id'])) {
             $update = $this->db->update('tblclients', $data_arr, ['userid' => $data['id']]);
-            return ($this->db->affected_rows() > 0) ? ['status' => true, 'message' => _l('customer_added_successfully')] : ['status' => true, 'message' => _l('customer_not_added_successfully')];
+            return ($this->db->affected_rows() > 0) ? ['status' => true, 'message' => _l('customer_updated_successfully')] : ['status' => true, 'message' => _l('customer_not_updated_successfully')];
         } else {
             $insert = $this->db->insert('tblclients', $data_arr);
             return ($insert) ? ['status' => true, 'message' => _l('customer_added_successfully')] : ['status' => true, 'message' => _l('customer_not_added_successfully')];

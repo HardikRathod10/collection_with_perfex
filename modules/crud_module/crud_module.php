@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
-    Module Name: crud_module
+    Module Name: CRUD module
     Description: This Custom Module is developed for Module to practice CRUD with perfex.
     Version: 1.0.0
     Requires at least: 3.0.*

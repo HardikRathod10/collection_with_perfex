@@ -10,13 +10,12 @@ class Crud_module extends AdminController
         $this->load->model('crud_module_model');
         $this->load->library(['form_validation']);
         $this->form_validation->set_error_delimiters('<p class="text-danger">', '</p>');
-        $this->load->helper('crud_module');
     }
 
     public function link2()
     {
         $data['title'] = _l('crud_module');
-        $data['countries'] = $this->crud_module_model->get_countries();
+        $data['countries'] = get_all_countries();
         $this->load->view('crud_view', $data);
     }
 
@@ -81,10 +80,15 @@ class Crud_module extends AdminController
     public function client_name_exists()
     {
         if ($this->input->is_ajax_request()) {
+
+            if (($this->input->post('id') != "")) {
+                echo json_encode(true);
+                exit;
+            }
             $cname = $this->input->post('cname');
             if ($cname != "") {
                 $query = $this->db->get_where('tblclients', ['company' => $cname]);
-                echo ($query->num_rows() > 0) ? json_encode(true) : json_encode(false);
+                echo ($query->num_rows() > 0) ? json_encode(false) : json_encode(true);
             }
         }
     }

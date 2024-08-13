@@ -22,5 +22,13 @@ function crud_module_module_init_menu_items() {
             'position' => 2,
         ]);
     }
+    if(has_permission('crud_module', '', 'view')){
+        get_instance()->app_menu->add_sidebar_children_item('crud_module',[
+            'slug'     => 'file_crud',
+            'name'     => _l('file_crud'),
+            'href'     => admin_url('crud_module/file_crud'),
+            'position' => 3,
+        ]);
+    }
 }
 

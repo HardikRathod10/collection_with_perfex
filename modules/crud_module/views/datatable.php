@@ -2,7 +2,7 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
-$aColumns = [
+$Columns = [
     'userid',
     'company',
     'phonenumber',
@@ -13,18 +13,21 @@ $aColumns = [
     'website'
 ];
 
-$sIndexColumn = 'userid';
-$sTable = 'tblclients';
+$IndexColumn = 'userid';
+$Table = 'tblclients';
 $join = [
     'LEFT JOIN ' . db_prefix() . 'countries ON ' . db_prefix() . 'clients.country = ' . db_prefix() . 'countries.country_id'
 ];
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join);
+// $where[] = ' AND `userid`=3';
+
+$result = data_tables_init($Columns, $IndexColumn, $Table, $join);
 $output = $result['output'];
 $rResult = $result['rResult'];
 
 foreach ($rResult as $aRow) {
     $row = [];
-
+    
+    //$row[] = "<div class='checkbox'><input type='checkbox' value='{$aRow['userid']}'><label></label></div>";
     $row[] = $aRow['userid'];
     $action_btn = '<div class="row-options"><a href="" id="edt-client" data-id="' . $aRow['userid'] . '">Edit</a> | <a href="" class="text-danger _delete" id="delete-client" data-id="' . $aRow['userid'] . '">Delete </a></div>';
     $row[] = $aRow['company'] . $action_btn;
