@@ -69,16 +69,27 @@ Following are methods that you can use to perform operations with collection.
    $output = $invoices->isNotEmpty();
    ```
 
-> You can explore more collection methods from [HERE](https://wendelladriel.com/blog/laravel-collections-the-artisans-guide)
+> You can explore more collection methods from [HERE](https://laravel.com/docs/11.x/collections)
    ---
 # Creating module
+
 Steps to create module:
+
 1. Generate module from module **bulder > build** from CRM by specifing module name, descriptions and contexts required.
+
 2. On successfully module generation it will download zip file for that module with specified module name.
+
 3. Upload that module zip file in perfex CRM **setup > modules**. After that folder with that module name will automatically gets generated inside modules folder in perfex CRM you can customize it as per requirement.
 
+>Every module must have to files install.php and init file wich name would be same as module name like form example module init file would be example.com.
+
+**Install.php** is used to perform some database releated operations like creating table or some columns inside table on installtion of module or perform task that are require to use that module.
+**init file** contains information about module like module name, description, link and different hooks
+
+> Inside module to quering database we have to use db_prefix() function to add prefix to table rather than writing direct table name with tbl prefilx. ex. Use **db_prefix.'options'** rather than **'tbloptions'**.
+
 # DataTable in perfex CRM
-> All datatable functions are located at helpers > datatables_helpers.php
+> All datatable functions are located at **helpers > datatables_helpers.php**
 #### Steps to initialize datatable in perfex
 1. Render table using render_datatable() inside view file where you want to display table.
 ```
@@ -178,4 +189,109 @@ foreach ($rResult as $aRow) {
         }
     }
 ```
+### Integreting payment gateway:
 
+We can create module to integrate payment gateway following are step that need to take to make it happen.
+
+1. Create module from module builder in crm.
+
+2. Load module in perfexCRM and activate it. Module folder with specified name would get created inside modules folder.
+
+3. Inside specified module, create folder **libraries** and inside that create class to procees payment Like **Example_gateway**
+ 
+   > Class name and file name must be same and file name must end with **_gateway** Ex: **Example_gateway.php**
+
+   ```
+   <?php
+   defined('BASEPATH') or exit('No direct script access allowed');
+   
+   class Example_gateway extends App_gateway
+   {
+       public function __construct()
+       {
+           /**
+           * Call App_gateway __construct function
+           */
+           parent::__construct();
+   
+           /**
+            * Gateway unique id - REQUIRED
+   	 * 
+            * * The ID must be alphanumeric
+            * * The filename (Example_gateway.php) and the class name must contain the id as ID_gateway
+            * * In this case our id is "example"
+            * * Filename will be Example_gateway.php (first letter is uppercase)
+            * * Class name will be Example_gateway (first letter is uppercase)
+            */
+           $this->setId('example');
+   
+           /**
+            * REQUIRED
+            * Gateway name
+            */
+           $this->setName('Example');
+   
+           /**
+            * Add gateway settings
+            * You can add other settings here 
+            * to fit for your gateway requirements
+            *
+            * Currently only 3 field types are accepted for gateway
+            *
+            * 'type'=>'yes_no'
+            * 'type'=>'input'
+            * 'type'=>'textarea'
+            *
+            */
+           $this->setSettings(array(
+               array(
+                   'name' => 'api_secret_key',
+                   'encrypted' => true,
+                   'label' => 'API KEY',
+                   'type'=>'input',
+               ),
+               array(
+                   'name' => 'api_publishable_key',
+                   'label' => 'SECRET KEY',
+                   'type'=>'input'
+               ),
+               array(
+                   'name' => 'currencies',
+                   'label' => 'settings_paymentmethod_currencies',
+                   'default_value' => 'USD,CAD'
+               ),
+           ));
+   
+       }
+   
+       /**
+        * Each time a customer click PAY NOW button on the invoice HTML area, the script will process the payment via this function.
+        * You can show forms here, redirect to gateway website, redirect to Codeigniter controller etc..
+        * @param  array $data - Contains the total amount to pay and the invoice information
+        * @return mixed
+        */
+       public function process_payment($data)
+       {
+           //Process for payment
+       }
+   }
+   ```
+   
+   > There must be settings for currency.
+    
+   > There must be process_payment method.
+   
+4. In module init file register payment gateway with **register_payment_gateway('example_gateway', 'module_name')**;
+
+After now you found this new gateway inside **setup>settings>payment** gateways where you can provices different settings regarding that gateway like api key, merchant ID etc, this may vary to gateway to gareway.
+
+>All setting will get store inside **tbloptions** table.
+
+Following are functions to work with options table.
+
+- add_option(name, value) : To add new option
+- get_option(name) : To get option value.
+- update_option(name, new_value) : To update existing option value.
+- delete_option(name) : To delete option.
+- option_exists(name) : To check specified option is exists or not.
+  
