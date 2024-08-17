@@ -288,6 +288,8 @@ We can create module to integrate payment gateway following are step that need t
     ```
     
    > There must be process_payment method.
+
+**For reference go** [here](https://help.perfexcrm.com/module-as-payment-gateway/)
    
 4. In module init file register payment gateway with **register_payment_gateway('example_gateway', 'module_name')**;
 
