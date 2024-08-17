@@ -278,6 +278,14 @@ We can create module to integrate payment gateway following are step that need t
    ```
    
    > There must be settings for currency.
+   > i.e.
+    ```
+       array(
+                   'name' => 'currencies',
+                   'label' => 'settings_paymentmethod_currencies',
+                   'default_value' => 'USD,CAD'
+               ),
+    ```
     
    > There must be process_payment method.
    
